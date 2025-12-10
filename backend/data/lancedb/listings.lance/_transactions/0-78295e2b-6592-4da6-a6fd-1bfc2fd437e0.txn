@@ -1,0 +1,4 @@
+$78295e2b-6592-4da6-a6fd-1bfc2fd437e0²¢"id ÿÿÿÿÿÿÿÿÿ*string8Zdefault'title ÿÿÿÿÿÿÿÿÿ*string8Zdefault&price ÿÿÿÿÿÿÿÿÿ*int648Zdefault&beds ÿÿÿÿÿÿÿÿÿ*double8Zdefault'baths ÿÿÿÿÿÿÿÿÿ*double8Zdefault&city ÿÿÿÿÿÿÿÿÿ*string8Zdefault.neighborhood ÿÿÿÿÿÿÿÿÿ*string8Zdefault-description ÿÿÿÿÿÿÿÿÿ*string8Zdefault)	amenities ÿÿÿÿÿÿÿÿÿ*list8Zdefaultitem	 *string08Zdefault.external_url
+ ÿÿÿÿÿÿÿÿÿ*string8Zdefault(source ÿÿÿÿÿÿÿÿÿ*string8Zdefault)	is_active ÿÿÿÿÿÿÿÿÿ*bool8Zdefault9last_scraped_at ÿÿÿÿÿÿÿÿÿ*timestamp:us:-8Zdefault<last_embedded_at ÿÿÿÿÿÿÿÿÿ*timestamp:us:-08Zdefault=vector ÿÿÿÿÿÿÿÿÿ*fixed_size_list:float:76808Zdefault"!
+lance.auto_cleanup.interval20"'
+lance.auto_cleanup.older_than14days
