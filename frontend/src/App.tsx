@@ -122,7 +122,7 @@ function App() {
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white shadow-sm">
             <Sparkles size={18} />
           </div>
-          <span className="font-bold text-lg tracking-tight text-black">mindtrip</span>
+          <span className="font-bold text-lg tracking-tight text-black">Havena</span>
         </div>
 
         <div className="flex flex-col gap-1 w-full px-3">
@@ -150,7 +150,7 @@ function App() {
             <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
               <User size={14} className="text-gray-500" />
             </div>
-            <span className="font-medium">Traveler</span>
+            <span className="font-medium">Renter</span>
           </button>
         </div>
       </div>
