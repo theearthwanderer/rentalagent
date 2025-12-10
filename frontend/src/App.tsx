@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
-import { Send, User, Bot, MapPin, Bed, Bath, Search, Sparkles } from 'lucide-react'
+import { Send, User, Bot, MapPin, Bed, Bath, Search, Sparkles, Home, MessageSquare, Compass, Settings } from 'lucide-react'
 import axios from 'axios'
 import clsx from 'clsx'
 
@@ -116,120 +116,155 @@ function App() {
 
   return (
     <div className="flex h-screen bg-white text-gray-900 font-sans overflow-hidden">
-      {/* Left Panel: Chat Interface */}
-      <div className="w-1/2 flex flex-col border-r border-gray-100 relative">
-
-        {/* Header */}
-        <div className="p-6 border-b border-gray-50 flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center text-white">
-            <Sparkles size={18} />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900">Rental Agent</h1>
+      {/* 1. Slim Sidebar (Navigation) */}
+      <div className="w-[72px] flex flex-col items-center py-6 border-r border-gray-100 bg-gray-50/50 flex-shrink-0">
+        <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white mb-8 shadow-sm">
+          <Sparkles size={20} />
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
-          {messages.length === 0 && (
-            <div className="text-center text-gray-400 mt-32">
-              <p className="text-lg font-medium text-gray-500">How can I help you find a home?</p>
-              <p className="text-sm mt-2">Try "Find a 1 bedroom in SoMa under $3500"</p>
-            </div>
-          )}
-
-          {messages.map((msg, i) => (
-            <div key={i} className={clsx("flex gap-4 max-w-xl", msg.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
-              <div className={clsx("w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm",
-                msg.role === 'user' ? "bg-gray-900 text-white" : "bg-white border border-gray-200 text-teal-600")}>
-                {msg.role === 'user' ? <User size={14} /> : <Bot size={16} />}
-              </div>
-
-              <div className="space-y-2">
-                <div className={clsx("px-5 py-3.5 shadow-sm text-[15px] leading-relaxed",
-                  msg.role === 'user'
-                    ? "bg-gray-100/80 text-gray-900 rounded-2xl rounded-tr-sm"
-                    : "bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm")}>
-                  {msg.content}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {status && (
-            <div className="flex items-center gap-2 text-gray-400 text-sm ml-12 animate-pulse">
-              <Search size={14} /> {status}
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+        <div className="flex flex-col gap-2 w-full px-3">
+          <button className="p-3 rounded-xl bg-white text-teal-600 shadow-sm border border-gray-100 transition-all hover:bg-gray-50 group">
+            <Home size={20} />
+          </button>
+          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all group">
+            <MessageSquare size={20} />
+          </button>
+          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all group">
+            <Compass size={20} />
+          </button>
         </div>
 
-        {/* Floating Input Area */}
-        <div className="absolute bottom-8 left-0 right-0 px-8">
-          <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto shadow-xl rounded-full bg-white ring-1 ring-gray-200 focus-within:ring-2 focus-within:ring-teal-500 transition-all">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything..."
-              className="w-full bg-transparent border-none text-gray-900 rounded-full pl-6 pr-14 py-4 focus:outline-none placeholder-gray-400"
-              disabled={readyState !== ReadyState.OPEN && !!sessionId}
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || readyState !== ReadyState.OPEN}
-              className="absolute right-2 top-2 p-2 bg-teal-500 hover:bg-teal-600 text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send size={18} />
-            </button>
-          </form>
-          <div className="text-center mt-3 text-xs text-gray-400 font-medium">
-            {readyState === ReadyState.OPEN ? "AI Agent Active" : "Connecting..."}
-          </div>
+        <div className="mt-auto flex flex-col gap-2 w-full px-3">
+          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all">
+            <Settings size={20} />
+          </button>
+          <div className="w-8 h-[1px] bg-gray-200 mx-auto my-1"></div>
+          <button className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mx-auto overflow-hidden hover:ring-2 ring-gray-200 transaction-all">
+            <User size={20} />
+          </button>
         </div>
       </div>
 
-      {/* Right Panel: Visual Context (Map/Listings) */}
-      <div className="w-1/2 bg-gray-50/50 p-8 overflow-y-auto">
-        {activeListings.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl">
-            <MapPin size={48} className="mb-4 opacity-20" />
-            <p>Listings will appear here</p>
+      {/* 2. Main Content Wrapper */}
+      <div className="flex-1 flex min-w-0">
+        {/* Left Panel: Chat Interface */}
+        <div className="w-1/2 flex flex-col border-r border-gray-100 relative min-w-[500px]">
+
+          {/* Header */}
+          <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-gray-900">Rental Assistant</h1>
+              <p className="text-xs text-gray-400 font-medium">Powered by Agentic AI</p>
+            </div>
+            <div className="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100">
+              Beta
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 content-start">
-            {activeListings.map((listing) => (
-              <div key={listing.id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer">
-                {/* Image Placeholder */}
-                <div className="h-40 bg-gray-200 relative">
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">
-                    See on Zillow
-                  </div>
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-xs font-bold text-gray-900 shadow-sm">
-                    ${listing.price}
-                  </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
+            {messages.length === 0 && (
+              <div className="text-center text-gray-400 mt-32">
+                <p className="text-lg font-medium text-gray-500">How can I help you find a home?</p>
+                <p className="text-sm mt-2">Try "Find a 1 bedroom in SoMa under $3500"</p>
+              </div>
+            )}
+
+            {messages.map((msg, i) => (
+              <div key={i} className={clsx("flex gap-4 max-w-xl", msg.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
+                <div className={clsx("w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm",
+                  msg.role === 'user' ? "bg-gray-900 text-white" : "bg-white border border-gray-200 text-teal-600")}>
+                  {msg.role === 'user' ? <User size={14} /> : <Bot size={16} />}
                 </div>
 
-                <div className="p-5">
-                  <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</h3>
-                  <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                    <MapPin size={12} /> {listing.city}, {listing.neighborhood}
-                  </p>
-
-                  <div className="flex items-center gap-4 text-xs text-gray-600 font-medium">
-                    <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                      <Bed size={14} className="text-gray-400" /> {listing.beds}
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                      <Bath size={14} className="text-gray-400" /> {listing.baths}
-                    </span>
+                <div className="space-y-2">
+                  <div className={clsx("px-5 py-3.5 shadow-sm text-[15px] leading-relaxed",
+                    msg.role === 'user'
+                      ? "bg-gray-100/80 text-gray-900 rounded-2xl rounded-tr-sm"
+                      : "bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm")}>
+                    {msg.content}
                   </div>
-
-                  <a href={listing.external_url} target="_blank" rel="noopener" className="mt-4 block w-full text-center py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-medium transition-colors">
-                    View Details
-                  </a>
                 </div>
               </div>
             ))}
+
+            {status && (
+              <div className="flex items-center gap-2 text-gray-400 text-sm ml-12 animate-pulse">
+                <Search size={14} /> {status}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
-        )}
+
+          {/* Floating Input Area */}
+          <div className="absolute bottom-8 left-0 right-0 px-8">
+            <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto shadow-xl rounded-full bg-white ring-1 ring-gray-200 focus-within:ring-2 focus-within:ring-teal-500 transition-all">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything..."
+                className="w-full bg-transparent border-none text-gray-900 rounded-full pl-6 pr-14 py-4 focus:outline-none placeholder-gray-400"
+                disabled={readyState !== ReadyState.OPEN && !!sessionId}
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || readyState !== ReadyState.OPEN}
+                className="absolute right-2 top-2 p-2 bg-teal-500 hover:bg-teal-600 text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send size={18} />
+              </button>
+            </form>
+            <div className="text-center mt-3 text-xs text-gray-400 font-medium">
+              {readyState === ReadyState.OPEN ? "AI Agent Active" : "Connecting..."}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel: Visual Context (Map/Listings) */}
+        <div className="w-1/2 bg-gray-50/50 p-8 overflow-y-auto">
+          {activeListings.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl">
+              <MapPin size={48} className="mb-4 opacity-20" />
+              <p>Listings will appear here</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 content-start">
+              {activeListings.map((listing) => (
+                <div key={listing.id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer">
+                  {/* Image Placeholder */}
+                  <div className="h-40 bg-gray-200 relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">
+                      See on Zillow
+                    </div>
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-xs font-bold text-gray-900 shadow-sm">
+                      ${listing.price}
+                    </div>
+                  </div>
+
+                  <div className="p-5">
+                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</h3>
+                    <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                      <MapPin size={12} /> {listing.city}, {listing.neighborhood}
+                    </p>
+
+                    <div className="flex items-center gap-4 text-xs text-gray-600 font-medium">
+                      <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                        <Bed size={14} className="text-gray-400" /> {listing.beds}
+                      </span>
+                      <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                        <Bath size={14} className="text-gray-400" /> {listing.baths}
+                      </span>
+                    </div>
+
+                    <a href={listing.external_url} target="_blank" rel="noopener" className="mt-4 block w-full text-center py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-medium transition-colors">
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
