@@ -116,31 +116,41 @@ function App() {
 
   return (
     <div className="flex h-screen bg-white text-gray-900 font-sans overflow-hidden">
-      {/* 1. Slim Sidebar (Navigation) */}
-      <div className="w-[72px] flex flex-col items-center py-6 border-r border-gray-100 bg-gray-50/50 flex-shrink-0">
-        <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white mb-8 shadow-sm">
-          <Sparkles size={20} />
+      {/* 1. Sidebar (Navigation) */}
+      <div className="w-[240px] flex flex-col py-6 border-r border-gray-100 bg-gray-50/50 flex-shrink-0">
+        <div className="px-6 mb-8 flex items-center gap-3">
+          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white shadow-sm">
+            <Sparkles size={18} />
+          </div>
+          <span className="font-bold text-lg tracking-tight text-black">mindtrip</span>
         </div>
 
-        <div className="flex flex-col gap-2 w-full px-3">
-          <button className="p-3 rounded-xl bg-white text-teal-600 shadow-sm border border-gray-100 transition-all hover:bg-gray-50 group">
-            <Home size={20} />
+        <div className="flex flex-col gap-1 w-full px-3">
+          <button className="flex items-center gap-3 p-3 rounded-xl bg-white text-black shadow-sm border border-gray-100 transition-all hover:bg-gray-50 group">
+            <Home size={20} className="text-black" />
+            <span className="font-medium">Chats</span>
           </button>
-          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all group">
-            <MessageSquare size={20} />
+          <button className="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white hover:text-black hover:shadow-sm transition-all group">
+            <MessageSquare size={20} className="group-hover:text-black" />
+            <span className="font-medium">Trips</span>
           </button>
-          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all group">
-            <Compass size={20} />
+          <button className="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white hover:text-black hover:shadow-sm transition-all group">
+            <Compass size={20} className="group-hover:text-black" />
+            <span className="font-medium">Explore</span>
           </button>
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 w-full px-3">
-          <button className="p-3 rounded-xl text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all">
-            <Settings size={20} />
+        <div className="mt-auto flex flex-col gap-1 w-full px-3">
+          <button className="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white hover:text-black hover:shadow-sm transition-all group">
+            <Settings size={20} className="group-hover:text-black" />
+            <span className="font-medium">Settings</span>
           </button>
-          <div className="w-8 h-[1px] bg-gray-200 mx-auto my-1"></div>
-          <button className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mx-auto overflow-hidden hover:ring-2 ring-gray-200 transaction-all">
-            <User size={20} />
+          <div className="w-full h-[1px] bg-gray-200 my-2"></div>
+          <button className="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white hover:text-black hover:shadow-sm transition-all group">
+            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              <User size={14} className="text-gray-500" />
+            </div>
+            <span className="font-medium">Traveler</span>
           </button>
         </div>
       </div>
