@@ -68,14 +68,13 @@ class RentalAgent:
                     result_str = json.dumps(raw_result, default=str)
                     result = json.loads(result_str)
                     
-                    # Special handling for search_listings to save tokens
+                    # Special handling for search_listings to save tokens & force re-search behavior
                     if function_name == "search_listings":
-                        # Create a summary for the LLM
                         count = len(result)
-                        top_ids = [r.get('id') for r in result[:3]]
-                        summary = f"Found {count} listings. Top 3 IDs: {top_ids}. Full results sent to UI."
-                        # Summarized history for LLM
-                        history_content = json.dumps({"summary": summary, "top_results": result[:5]}, default=str)
+                        # We expressly hide details from the LLM so it DOES NOT answer based on stale/partial data.
+                        # It must use tools to get details or refine search.
+                        summary = f"Found {count} listings. (full results being rendered in UI)"
+                        history_content = json.dumps({"summary": summary}, default=str)
                     else:
                         # Standard handling for other tools
                         history_content = json.dumps(result, default=str)

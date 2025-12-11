@@ -17,6 +17,7 @@ class SearchParameters(BaseModel):
     min_beds: Optional[int] = Field(None, description="Minimum number of bedrooms")
     max_beds: Optional[int] = Field(None, description="Maximum number of bedrooms")
     min_baths: Optional[int] = Field(None, description="Minimum number of bathrooms")
+    max_baths: Optional[int] = Field(None, description="Maximum number of bathrooms")
     
     # New Phase 2 Filters
     pets_allowed: Optional[bool] = Field(None, description="If True, only show listings allowing pets")
@@ -38,7 +39,7 @@ class SearchListingsTool(Tool):
     async def execute(self, query: str = None, 
                       min_price: int = None, max_price: int = None, 
                       min_beds: int = None, max_beds: int = None, 
-                      min_baths: int = None, 
+                      min_baths: int = None, max_baths: int = None,
                       pets_allowed: bool = None, parking: bool = None,
                       laundry: bool = None, air_conditioning: bool = None,
                       min_vibe: float = None,
@@ -59,8 +60,9 @@ class SearchListingsTool(Tool):
         else:
             # Pure Filter Search
             search_builder = table.search() # No vector
-            
-        search_builder.limit(50)
+        
+        # we don't need to limit here, we will limit in the UI
+        # search_builder.limit(50)
 
         # 3. Construct Filters
         filters = []
@@ -69,6 +71,7 @@ class SearchListingsTool(Tool):
         if min_beds is not None: filters.append(f"beds >= {min_beds}")
         if max_beds is not None: filters.append(f"beds <= {max_beds}")
         if min_baths is not None: filters.append(f"baths >= {min_baths}")
+        if max_baths is not None: filters.append(f"baths <= {max_baths}")
         
         # Boolean filters - strictly enforce if requested
         if pets_allowed: filters.append("pets_allowed = true")
