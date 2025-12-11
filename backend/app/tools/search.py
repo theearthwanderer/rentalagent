@@ -55,7 +55,8 @@ class SearchListingsTool(Tool):
             # Semantic Search
             embedding_service = get_embedding_service()
             loop = asyncio.get_running_loop()
-            vector = await loop.run_in_executor(None, embedding_service.get_embedding, query)
+            # E5 requires query prefix
+            vector = await loop.run_in_executor(None, embedding_service.get_embedding, query, True)
             search_builder = table.search(vector)
         else:
             # Pure Filter Search

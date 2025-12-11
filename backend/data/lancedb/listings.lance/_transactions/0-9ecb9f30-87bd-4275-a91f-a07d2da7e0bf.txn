@@ -1,0 +1,7 @@
+$9ecb9f30-87bd-4275-a91f-a07d2da7e0bf²ƒ
+"id ÿÿÿÿÿÿÿÿÿ*string8Zdefault'title ÿÿÿÿÿÿÿÿÿ*string8Zdefault&price ÿÿÿÿÿÿÿÿÿ*int648Zdefault%beds ÿÿÿÿÿÿÿÿÿ*int648Zdefault&baths ÿÿÿÿÿÿÿÿÿ*int648Zdefault%sqft ÿÿÿÿÿÿÿÿÿ*int648Zdefault&city ÿÿÿÿÿÿÿÿÿ*string8Zdefault.neighborhood ÿÿÿÿÿÿÿÿÿ*string8Zdefault-description ÿÿÿÿÿÿÿÿÿ*string8Zdefault,pets_allowed	 ÿÿÿÿÿÿÿÿÿ*bool8Zdefault'parking
+ ÿÿÿÿÿÿÿÿÿ*bool8Zdefault'laundry ÿÿÿÿÿÿÿÿÿ*bool8Zdefault0air_conditioning ÿÿÿÿÿÿÿÿÿ*bool8Zdefault,
+vibe_score ÿÿÿÿÿÿÿÿÿ*double8Zdefault0location_score ÿÿÿÿÿÿÿÿÿ*double8Zdefault.safety_score ÿÿÿÿÿÿÿÿÿ*double8Zdefault3walkability_score ÿÿÿÿÿÿÿÿÿ*double8Zdefault)	amenities ÿÿÿÿÿÿÿÿÿ*list8Zdefaultitem *string08Zdefault&images ÿÿÿÿÿÿÿÿÿ*list8Zdefaultitem *string08Zdefault4
+created_at ÿÿÿÿÿÿÿÿÿ*timestamp:us:-8Zdefault.external_url ÿÿÿÿÿÿÿÿÿ*string8Zdefault(source ÿÿÿÿÿÿÿÿÿ*string8Zdefault)	is_active ÿÿÿÿÿÿÿÿÿ*bool8Zdefault<last_embedded_at ÿÿÿÿÿÿÿÿÿ*timestamp:us:-08Zdefault>vector ÿÿÿÿÿÿÿÿÿ*fixed_size_list:float:102408Zdefault"!
+lance.auto_cleanup.interval20"'
+lance.auto_cleanup.older_than14days

@@ -24,6 +24,20 @@ GOLDEN_SET = [
         "query": "Cheap studio under $2000",
         "expected_filters": {"max_price": 2000},
         "expected_terms": []
+    },
+    {
+        # Semantic check: E5 model should understand 'top floor' implies view/elevation
+        "query": "Top floor apartment with view",
+        "expected_filters": {},
+        "expected_terms": ["top floor", "penthouse", "view"] 
+    },
+    {
+        # Semantic check: Penthouse should optimally retrieve top floor units even without exact keyword
+        "query": "Penthouse suite",
+        "expected_filters": {},
+        # In a perfect world, "top floor" matches "penthouse" semantically.
+        # We list both as success criteria.
+        "expected_terms": ["penthouse", "top floor"] 
     }
 ]
 

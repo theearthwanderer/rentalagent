@@ -7,7 +7,7 @@ class EmbeddingService:
     _instance = None
     _model = None
     
-    MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+    MODEL_NAME = "intfloat/e5-large-v2"
 
     @classmethod
     def get_instance(cls):
@@ -20,8 +20,10 @@ class EmbeddingService:
         self._model = SentenceTransformer(self.MODEL_NAME)
         logger.info("Embedding model loaded")
 
-    def get_embedding(self, text: str) -> list[float]:
-        return self._model.encode(text).tolist()
+    def get_embedding(self, text: str, is_query: bool = False) -> list[float]:
+        # E5 models require specific prefixes
+        prefix = "query: " if is_query else "passage: "
+        return self._model.encode(prefix + text).tolist()
 
 def get_embedding_service():
     return EmbeddingService.get_instance()

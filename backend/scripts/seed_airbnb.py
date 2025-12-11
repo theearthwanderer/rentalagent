@@ -20,7 +20,17 @@ from app.services.embeddings import EmbeddingService
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+import re # Added import
+
 CSV_PATH = "/Users/henrytran/Downloads/listings.csv"
+
+def clean_text(text):
+    if not text: return ""
+    # Remove HTML tags
+    clean = re.sub(r'<.*?>', '', text)
+    # Remove multiple spaces/newlines
+    clean = re.sub(r'\s+', ' ', clean).strip()
+    return clean
 
 def parse_price(price_str):
     if not price_str: return 0
@@ -78,7 +88,7 @@ def seed():
     with open(CSV_PATH, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         
-        for row in reader:
+        for i, row in enumerate(reader):
             # Filters
             if row['room_type'] != "Entire home/apt":
                 continue
@@ -88,19 +98,20 @@ def seed():
                 continue
                 
             # Basic data
-            amenities = parse_amenities(row.get('amenities', '[]'))
-            bools = derive_booleans(amenities)
+            amenities_list = parse_amenities(row.get('amenities', '[]'))
+            bools = derive_booleans(amenities_list)
             
-            # Combine text for embedding
-            desc = f"{row.get('name', '')}. {row.get('description', '')}. {row.get('neighborhood_overview', '')}"
-            # Truncate if too long (rare but safe)
-            desc = desc[:2000]
+            # Helper to clean text
+            raw_desc = f"{row.get('name', '')}. {row.get('description', '')}. {row.get('neighborhood_overview', '')}"
+            cleaned_desc = clean_text(raw_desc)
+            cleaned_desc = cleaned_desc[:2000]
             
             try:
-                # Embed (this is the slow part, normally valid to batch, but for simplicity loop is OK for <500 items)
-                # Actually, for speed, let's collect texts first then batch embed if list is huge.
-                # But here we do row-by-row for simplicity of logic.
-                vector = embedder.get_embedding(desc)
+                # Combined text for embedding (Passage)
+                text_to_embed = f"{row.get('name')} {cleaned_desc}"
+                
+                # Generate Vector (is_query=False for passages)
+                vector = embedder.get_embedding(text_to_embed, is_query=False)
                 
                 listing = Listing(
                     id=row['id'],
@@ -111,7 +122,7 @@ def seed():
                     sqft=0, # Not reliably in Airbnb CSV
                     city="San Francisco",
                     neighborhood=row.get('neighbourhood_cleansed') or "San Francisco",
-                    description=desc,
+                    description=cleaned_desc, # Store cleaned description
                     
                     pets_allowed=bools['pets_allowed'],
                     parking=bools['parking'],
@@ -123,7 +134,7 @@ def seed():
                     safety_score=4.0, # Placeholder
                     walkability_score=clean_score(row.get('review_scores_location', '0')), # Proxy
                     
-                    amenities=amenities[:10], # Keep top 10 to save space
+                    amenities=amenities_list[:10], # Keep top 10 to save space
                     images=[row.get('picture_url', '')],
                     created_at=datetime.now(),
                     
@@ -133,16 +144,19 @@ def seed():
                 
                 listings_to_insert.append(listing.model_dump())
                 
-                if len(listings_to_insert) >= 10: # Log progress
-                    print(".", end="", flush=True)
+                if i % 100 == 0: # Log progress
+                    logger.info(f"Processed {i} listings for embedding...")
                     
             except Exception as e:
                 logger.warning(f"Skipping row {row.get('id')}: {e}")
                 continue
 
-    logger.info(f"\nInserting {len(listings_to_insert)} listings...")
+    # 3. Create Table (OVERWRITE to clean up old indices/schema)
     if listings_to_insert:
-        table.add(listings_to_insert)
+        logger.info(f"Inserting {len(listings_to_insert)} listings into '{client.TABLE_NAME}' table (OVERWRITE mode)...")
+        # Use client._db.create_table with mode='overwrite'
+        table = client._db.create_table(client.TABLE_NAME, listings_to_insert, mode="overwrite")
+        logger.info("Table created/overwritten.")
         logger.info("Done!")
     else:
         logger.warning("No listings found matching criteria!")

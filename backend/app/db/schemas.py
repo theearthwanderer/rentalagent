@@ -31,9 +31,6 @@ class Listing(BaseModel):
     images: list[str]
     created_at: datetime = Field(default_factory=datetime.now)
 
-    # Vector for LanceDB
-    vector: Vector(768)
-    
     # Metadata
     external_url: str
     source: str = "seed"
@@ -41,7 +38,7 @@ class Listing(BaseModel):
     last_embedded_at: datetime | None = None
     
     # Vector for LanceDB
-    vector: Vector(768)
+    vector: Vector(1024)
 
     model_config = ConfigDict(extra="ignore")
 
