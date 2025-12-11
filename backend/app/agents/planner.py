@@ -3,6 +3,7 @@ import structlog
 from typing import List, Dict, Any
 from app.state.models import RentalSession, ConversationMessage
 from app.tools.search import SearchListingsTool
+from app.tools.listings import GetListingDetailsTool
 from app.core.config import settings
 from openai import AsyncOpenAI
 
@@ -11,7 +12,8 @@ logger = structlog.get_logger()
 class RentalAgent:
     def __init__(self):
         self.tools = {
-            "search_listings": SearchListingsTool()
+            "search_listings": SearchListingsTool(),
+            "get_listing_details": GetListingDetailsTool()
         }
         self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.model = "gpt-4o" # or gpt-4-turbo
@@ -60,39 +62,44 @@ class RentalAgent:
                 tool_instance = self.tools.get(function_name)
                 if tool_instance:
                     logger.info(f"Executing tool: {function_name}", args=arguments)
-                    result = await tool_instance.execute(**arguments)
+                    raw_result = await tool_instance.execute(**arguments)
                     
-                    # Store result in history
-                    # We serialize for the LLM history (string)
-                    result_str = json.dumps(result, default=str)
+                    # Sanitize result (convert datetimes to strings) for both LLM and Frontend
+                    result_str = json.dumps(raw_result, default=str)
+                    result = json.loads(result_str)
+                    
+                    # Special handling for search_listings to save tokens
+                    if function_name == "search_listings":
+                        # Create a summary for the LLM
+                        count = len(result)
+                        top_ids = [r.get('id') for r in result[:3]]
+                        summary = f"Found {count} listings. Top 3 IDs: {top_ids}. Full results sent to UI."
+                        # Summarized history for LLM
+                        history_content = json.dumps({"summary": summary, "top_results": result[:5]}, default=str)
+                    else:
+                        # Standard handling for other tools
+                        history_content = json.dumps(result, default=str)
+
+                    # Store result in history (Optimized)
                     session.conversation_history.append(ConversationMessage(
                         role="tool",
-                        content=result_str,
+                        content=history_content,
                         tool_call_id=tool_call.id,
                         name=function_name
                     ))
                     
-                    # For the frontend, we want structured data but JSON safe (no datetimes)
-                    # We can reuse the stringified version or re-parse it to ensure valid JSON types
+                    # For the frontend, pass the FULL result
                     tool_results.append({
                         "name": function_name,
-                        "result": json.loads(result_str)
+                        "result": result # Send full list to UI (including all 50 items)
                     })
                 else:
                     logger.error(f"Tool not found: {function_name}")
             
             # Recursive call with tool results
-            # We return a merged response so the frontend knows what happened
-            # Optionally we can just recurse and return the final text, 
-            # but usually we want to stream tool calls to frontend too.
-            # detailed agent loop. 
-            
-            # Recurse
             final_response = await self.run_turn(session, user_message=None)
             
-            # Merge tool info for frontend awareness if needed, 
-            # but for now assume final_response contains the text we need.
-            # We might want to inject `tool_results` into the return dict for frontend display
+            # Merge tool info for frontend display
             if "tool_results" not in final_response:
                 final_response["tool_results"] = []
             final_response["tool_results"].extend(tool_results)
@@ -116,17 +123,20 @@ class RentalAgent:
             }
 
     def _build_ops_messages(self, session: RentalSession) -> List[Dict[str, Any]]:
-        system_prompt = """You are a helpful and knowledgeable Rental Agent. 
-        Your goal is to help users find rental properties that match their needs.
+        system_prompt = """You are Havena, an advanced AI Rental Agent.
         
-        You have access to a tool 'search_listings' to find properties.
-        ALWAYS use the search tool when the user asks for listings or specific criteria.
+        CAPABILITIES:
+        1. Search: You can search by price, beds, baths, location, and specific amenities (pets, parking, laundry, AC).
+        2. Vibe: You can filter by 'vibe score' (0-5) or semantic queries like "quiet", "sunny", "safe".
+        3. Details: You can retrieve full details for a specific listing using 'get_listing_details'.
         
-        When replying:
-        1. Be friendly and professional.
-        2. If you find listings, summarize the top 3-4 most relevant ones in your text response, highlighting why they match.
-        3. If no listings match, ask clarifying questions to adjust parameters.
-        4. Ask about budget, location, and bedroom count if not provided.
+        BEHAVIOR:
+        - STATEFUL SEARCH: If the user says "make it cheaper" or "add parking", you must CALL search_listings AGAIN with the new filters merged with the previous ones.
+        - TOKEN EFFICIENCY: The search tool returns a summary to you. Trust that the full list is shown to the user in the UI.
+        - COMPARISON: If asked to compare, fetch details for the relevant listings and give a side-by-side analysis.
+        - COMMUTE: You can discuss transport scores and nearby transit if available in the description/metadata.
+        
+        When replying, be concise, helpful, and professional.
         """
         
         msgs = [{"role": "system", "content": system_prompt}]

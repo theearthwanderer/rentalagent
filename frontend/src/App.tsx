@@ -30,10 +30,16 @@ interface Listing {
   price: number
   beds: number
   baths: number
+  sqft: number
   city: string
   neighborhood: string
   description: string
-  vector?: number[]
+  pets_allowed: boolean
+  parking: boolean
+  laundry: boolean
+  air_conditioning: boolean
+  vibe_score: number
+  images: string[]
   external_url: string
 }
 
@@ -239,31 +245,61 @@ function App() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 content-start">
+              {/* Listings Grid */}
               {activeListings.map((listing) => (
-                <div key={listing.id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer">
-                  {/* Image Placeholder */}
-                  <div className="h-40 bg-gray-200 relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">
-                      See on Zillow
+                <div key={listing.id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full">
+                  {/* Image */}
+                  <div className="h-48 bg-gray-200 relative overflow-hidden">
+                    {listing.images && listing.images.length > 0 ? (
+                      <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">No Image</div>
+                    )}
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-bold text-gray-900 shadow-sm border border-gray-100/50">
+                      ${listing.price.toLocaleString()}
                     </div>
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-xs font-bold text-gray-900 shadow-sm">
-                      ${listing.price}
-                    </div>
+                    {listing.vibe_score > 0 && (
+                      <div className="absolute top-3 left-3 bg-black/70 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-white shadow-sm flex items-center gap-1">
+                        <Sparkles size={10} className="text-yellow-400" /> {listing.vibe_score.toFixed(1)}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="p-5">
-                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{listing.title}</h3>
-                    <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                      <MapPin size={12} /> {listing.city}, {listing.neighborhood}
-                    </p>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 mb-1 line-clamp-1 leading-tight">{listing.title}</h3>
+                      <p className="text-sm text-gray-500 mb-3 flex items-center gap-1">
+                        <MapPin size={12} /> {listing.neighborhood || listing.city}
+                      </p>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-600 font-medium">
-                      <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                        <Bed size={14} className="text-gray-400" /> {listing.beds}
-                      </span>
-                      <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                        <Bath size={14} className="text-gray-400" /> {listing.baths}
-                      </span>
+                      {/* Beds/Baths/Sqft */}
+                      <div className="flex items-center gap-3 text-xs text-gray-700 font-medium mb-3">
+                        <span className="flex items-center gap-1.5">
+                          <Bed size={14} className="text-gray-400" /> {listing.beds} bd
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Bath size={14} className="text-gray-400" /> {listing.baths} ba
+                        </span>
+                        {listing.sqft > 0 && (
+                          <span className="text-gray-400">| {listing.sqft} sqft</span>
+                        )}
+                      </div>
+
+                      {/* Amenities Badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {listing.pets_allowed && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-green-50 text-green-700 text-[10px] font-semibold border border-green-100">Pets</span>
+                        )}
+                        {listing.parking && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-100">Parking</span>
+                        )}
+                        {listing.laundry && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-100">Laundry</span>
+                        )}
+                        {listing.air_conditioning && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-orange-50 text-orange-700 text-[10px] font-semibold border border-orange-100">AC</span>
+                        )}
+                      </div>
                     </div>
 
                     <a href={listing.external_url} target="_blank" rel="noopener" className="mt-4 block w-full text-center py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-medium transition-colors">
